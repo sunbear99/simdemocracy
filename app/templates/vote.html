@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h1>{{ election.title }}</h1>
+    <form method="post">
+        {% if election.type == 'REFERENDUM' %}
+            <label style="cursor:pointer; display:block; padding:10px; border:1px solid #ddd; margin-bottom:5px; border-radius:5px;">
+                <input type="radio" name="choice" value="Yes" required> <strong>YES</strong>
+            </label>
+            <label style="cursor:pointer; display:block; padding:10px; border:1px solid #ddd; border-radius:5px;">
+                <input type="radio" name="choice" value="No"> <strong>NO</strong>
+            </label>
+        {% else %}
+            {% for name in election.candidates %}
+                {% set profile = meta.get(name) %}
+                <div class="cand-row">
+                    <img src="{{ profile.avatar_url if profile and profile.avatar_url else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="cand-img">
+                    <div style="flex:1;">
+                        <h3 style="margin:0 0 5px 0;">{{ name }}</h3>
+                        {% if profile %}
+                            <p style="color:#555; font-style:italic; font-size:0.9em; margin-bottom:10px;">"{{ profile.statement }}"</p>
+                        {% endif %}
+                        <label>Score (0-5)</label>
+                        <input type="number" name="{{ name }}" min="0" max="5" value="0" style="width:80px">
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <br><br>
+        <button class="btn btn-success">Submit Secure Ballot</button>
+    </form>
+</div>
+{% endblock %}

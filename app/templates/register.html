@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Voter Registration</h2>
+    <form method="post" style="margin-top:20px;">
+        <label>Are you a Tide alt?</label>
+        <div style="margin:15px 0;">
+            <label style="margin-right:20px;"><input type="radio" name="alt_check" value="Yes" required> Yes</label>
+            <label><input type="radio" name="alt_check" value="No"> No</label>
+        </div>
+        <button class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Candidates for {{ election.title }}</h1>
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-outline" style="color:#555; margin-bottom:20px;">&larr; Back to Dashboard</a>
+
+{% if not profiles %}
+    <div class="card"><p>No candidates have declared yet.</p></div>
+{% else %}
+    {% for p in profiles %}
+    <div class="card" style="border-top: 4px solid var(--info);">
+        <div style="display:flex; align-items:center; gap:15px; margin-bottom:10px;">
+            <img src="{{ p.avatar_url or 'https://cdn.discordapp.com/embed/avatars/0.png' }}" style="width:48px; height:48px; border-radius:50%;">
+            <h3 style="margin:0;">{{ p.name }}</h3>
+        </div>
+        <p style="white-space: pre-wrap; color:#444;">{{ p.statement }}</p>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

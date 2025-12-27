@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>✍️ Declare Candidacy</h2>
+    <p>You are declaring as <strong>{{ username }}</strong>.</p>
+    <form method="post">
+        <label>Manifesto / Statement</label>
+        <textarea name="stmt" required placeholder="Your manifesto..." style="height:150px;"></textarea>
+        <button class="btn btn-primary">Submit Declaration</button>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline" style="color:#555;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

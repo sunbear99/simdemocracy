@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SimDemocracy Vote{% endblock %}</title>
+    <style>
+        :root { --primary: #2563eb; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --text-muted: #6b7280; --border: #e5e7eb; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; line-height: 1.6; }
+        .navbar { background-color: #1e293b; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: var(--bg-card); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; font-size: 0.9rem; }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-warning { background-color: var(--warning); color: #111; }
+        .btn-info { background-color: var(--info); color: white; }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.85rem; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-open { background: #d1fae5; color: #065f46; }
+        .badge-cfc { background: #fef3c7; color: #92400e; }
+        .badge-closed { background: #e5e7eb; color: #374151; }
+        input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 1rem; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .flex-between { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+        .cand-row { display: flex; gap: 15px; border-top: 1px solid #eee; padding: 15px 0; }
+        .cand-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div><strong>SimDemocracy Vote</strong></div>
+        <div class="user-status" style="display:flex; align-items:center; gap:10px;">
+            {% if session.get('user_id') %}
+                <img src="{{ session.get('avatar_url', '') }}" style="width:32px; height:32px; border-radius:50%;">
+                <span>{{ session.get('username') }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline">Logout</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-primary">Login with Discord</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ election.title }} Results</h2>
+    
+    <div style="background:#f0f9ff; padding:15px; border-radius:5px; margin-bottom:20px;">
+        <strong>Outcome:</strong>
+        <ul>
+            {% for res in election.results %}
+                <li>{{ res }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <h3>Public Audit Ledger</h3>
+    <p class="text-muted">Rows are randomized for anonymity.</p>
+    <table>
+        <tr>
+            <th>Token</th>
+            <th>Ballot Data</th>
+        </tr>
+        {% for b in ballots %}
+        <tr>
+            <td><code>{{ b.verification_token }}</code></td>
+            <td>{{ b.vote_choice }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <br>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+# --- Security & Secrets ---
+.env
+instance/
+config.py.local
+
+# --- Database ---
+*.db
+*.sqlite
+*.sqlite3
+simdemocracy.db
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual Environments ---
+venv/
+env/
+.venv/
+
+# --- IDE Settings ---
+.vscode/
+.idea/
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- Data Files (Optional) ---
+# Uncomment the line below if you don't want to share your voter list
+voters.csv
