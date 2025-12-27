@@ -32,7 +32,15 @@
 </head>
 <body>
     <nav class="navbar">
-        <div><strong>SimDemocracy Vote</strong></div>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <a href="{{ url_for('main.dashboard') }}" style="color:white; text-decoration:none; font-weight:bold; font-size:1.2em;">
+                SimDemocracy Vote
+            </a>
+            <a href="{{ url_for('main.help_page') }}" style="color:#cbd5e1; text-decoration:none; font-size:0.9em;">
+                ❓ Help
+            </a>
+        </div>
+        
         <div class="user-status" style="display:flex; align-items:center; gap:10px;">
             {% if session.get('user_id') %}
                 <img src="{{ session.get('avatar_url', '') }}" style="width:32px; height:32px; border-radius:50%;">
