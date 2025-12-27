@@ -1,5 +1,7 @@
 import csv
 import os
+import math
+import random
 from app.extensions import db
 
 # --- CSV HELPER ---
@@ -54,31 +56,118 @@ def calculate_star(ballots):
     return [f"Winner: {winner}", f"Runoff: {f1} ({v1}) vs {f2} ({v2})"]
 
 def calculate_tea(ballots, cands):
-    seats = 3
+    """
+    Implements TEA (Threshold Equal Approval) with:
+    1. Dynamic seat calculation: min(floor(3.5 + x/11), 40)
+    2. 4-step Tiebreaker: Weight Sum > Weighted Score > Unweighted Score > Random
+    """
+    # 1. Calculate Seats
+    x = len(ballots)
+    seats = min(int(math.floor(3.5 + x / 11)), 40)
+    
+    # If no seats or no candidates, return empty
+    if seats == 0 or not cands:
+        return []
+
     elected = []
     rem = list(cands)
     quota = len(ballots) / seats
     thresh = 5
+
     while len(elected) < seats and rem:
         pot = []
+        
+        # §1.1.2 Identify candidates meeting quota at current threshold
         for c in rem:
-            sup = [b for b in ballots if b['scores'].get(c,0) >= thresh]
-            if sum(b['weight'] for b in sup) >= quota:
+            # Get supporters (score >= thresh)
+            sup = [b for b in ballots if b['scores'].get(c, 0) >= thresh]
+            current_weight_sum = sum(b['weight'] for b in sup)
+            
+            if current_weight_sum >= quota:
                 n = solve_for_n([b['weight'] for b in sup], quota)
-                pot.append({'name': c, 'n': n, 'sup': sup})
+                
+                # --- Tiebreaker Metrics (§1.2) ---
+                # TB1: Sum of weights for scores >= thresh (The support weight)
+                tb_1 = current_weight_sum
+                
+                # TB2: Sum of weighted scores (Using current ballot weights)
+                tb_2 = sum(b['weight'] * b['scores'].get(c, 0) for b in ballots)
+                
+                # TB3: Sum of unweighted scores
+                tb_3 = sum(b['scores'].get(c, 0) for b in ballots)
+                
+                # TB4: Random
+                tb_4 = random.random()
+
+                pot.append({
+                    'name': c, 
+                    'n': n, 
+                    'sup': sup,
+                    'tb_1': tb_1,
+                    'tb_2': tb_2,
+                    'tb_3': tb_3,
+                    'tb_4': tb_4
+                })
+
         if pot:
-            win = min(pot, key=lambda x: x['n'])
+            # Sort candidates to find the winner.
+            # Priority: Min n -> Max TB1 -> Max TB2 -> Max TB3 -> Random
+            # Python sorts ascending, so we negate (-) the "Max" criteria.
+            pot.sort(key=lambda x: (x['n'], -x['tb_1'], -x['tb_2'], -x['tb_3'], x['tb_4']))
+            
+            win = pot[0]
             elected.append(win['name'])
             rem.remove(win['name'])
+            
+            # Reweight ballots for the winner
             for b in win['sup']:
-                b['weight'] -= min(b['weight'], win['n'])
-                if b['weight'] < 0: b['weight'] = 0
+                reduction = min(b['weight'], win['n'])
+                b['weight'] -= reduction
+                # Prevent floating point underflow errors
+                if b['weight'] < 1e-9: b['weight'] = 0.0
+        
         else:
-            if thresh > 1: thresh -= 1
+            # If no one qualifies, try lowering the threshold
+            if thresh > 1:
+                thresh -= 1
             else:
-                best = max(rem, key=lambda c: sum(b['weight'] for b in ballots if b['scores'].get(c,0)>0))
-                elected.append(best)
-                rem.remove(best)
+                # §1.1.5 Fallback: Elect based on greatest sum of positive weights
+                fallback_pot = []
+                for c in rem:
+                    # Primary Metric: Sum of weights for scores > 0
+                    pos_sup = [b for b in ballots if b['scores'].get(c, 0) > 0]
+                    primary_weight = sum(b['weight'] for b in pos_sup)
+                    
+                    # Tiebreakers apply here as well
+                    tb_1 = primary_weight
+                    tb_2 = sum(b['weight'] * b['scores'].get(c, 0) for b in ballots)
+                    tb_3 = sum(b['scores'].get(c, 0) for b in ballots)
+                    tb_4 = random.random()
+                    
+                    fallback_pot.append({
+                        'name': c,
+                        'primary': primary_weight,
+                        'tb_1': tb_1,
+                        'tb_2': tb_2,
+                        'tb_3': tb_3,
+                        'tb_4': tb_4
+                    })
+                
+                # If no candidates have any positive scores left, we stop (or elect remaining randomly?)
+                # Usually implies end of viable election.
+                if not fallback_pot:
+                    break
+
+                # Sort Fallback: Max Primary -> Max TB1 -> Max TB2...
+                fallback_pot.sort(key=lambda x: (-x['primary'], -x['tb_1'], -x['tb_2'], -x['tb_3'], x['tb_4']))
+                
+                best = fallback_pot[0]
+                elected.append(best['name'])
+                rem.remove(best['name'])
+                
+                # Exhaust ballots for the winner
                 for b in ballots:
-                    if b['scores'].get(best,0)>0: b['weight'] = 0
+                    if b['scores'].get(best['name'], 0) > 0:
+                        b['weight'] = 0.0
+
     return elected
