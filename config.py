@@ -17,6 +17,10 @@ class Config:
     DISCORD_CLIENT_ID = os.environ.get('DISCORD_CLIENT_ID')
     DISCORD_CLIENT_SECRET = os.environ.get('DISCORD_CLIENT_SECRET')
     DISCORD_REDIRECT_URI = os.environ.get('DISCORD_REDIRECT_URI')
+    REDDIT_CLIENT_ID = os.environ.get('REDDIT_CLIENT_ID')
+    REDDIT_CLIENT_SECRET = os.environ.get('REDDIT_CLIENT_SECRET')
+    REDDIT_REDIRECT_URI = os.environ.get('REDDIT_REDIRECT_URI')
+    REDDIT_USER_AGENT = os.environ.get("REDDIT_USER_AGENT")
     DISCORD_API_BASE_URL = 'https://discord.com/api/v10'
     
     # Admins: Loaded from .env (comma-separated string) -> List

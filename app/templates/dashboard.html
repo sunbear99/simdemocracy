@@ -4,23 +4,35 @@
     {% if session.get('user_id') and not is_registered %}
     <div class="card" style="border-left: 5px solid #2563eb; background: #eff6ff;">
         <h3>⚠️ You are not registered to vote.</h3>
-        <p>You must register before you can participate in SimDemocracy Vote.</p>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Register to Vote</a>
-    </div>
+        <p>You are not currently on the voter rolls.</p>
+        <p style="margin-bottom:0; color:#4b5563;">
+            <strong>To participate:</strong> Please contact the <em>Registration Commission (RC)</em> to have your ID added to the registry.
+        </p>
+        </div>
     {% endif %}
 
     {% if is_admin %}
     <div class="card" style="background:#fff7ed; border-color:#fdba74;">
         <h3>🛠️ Admin Panel</h3>
-        <form action="{{ url_for('admin.create_election') }}" method="post" class="flex-between">
-            <input type="text" name="title" placeholder="Election Title" required style="flex:2; margin:0;">
-            <select name="type" style="flex:1; margin:0;">
-                <option value="SENATE">Senate</option>
-                <option value="STAR">Presidential</option>
-                <option value="REFERENDUM">Referendum</option>
-            </select>
-            <button type="submit" class="btn btn-danger">Create</button>
-        </form>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+            
+            <form action="{{ url_for('admin.create_election') }}" method="post" style="flex:1; min-width:300px;">
+                <label><strong>New Election:</strong></label>
+                <div class="flex-between">
+                    <input type="text" name="title" placeholder="Title" required style="margin:0;">
+                    <select name="type" style="margin:0;">
+                        <option value="SENATE">Senate</option>
+                        <option value="STAR">Presidential</option>
+                        <option value="REFERENDUM">Referendum</option>
+                    </select>
+                    <button type="submit" class="btn btn-danger">Create</button>
+                </div>
+            </form>
+            
+            <div style="width:100%; margin-top:10px;">
+                <a href="{{ url_for('admin.strike_vote') }}" class="btn btn-outline" style="color:#ef4444; border-color:#ef4444;">🚫 Strike Rigged Vote Tool</a>
+             </div>
+        </div>
     </div>
     {% endif %}
 
@@ -32,6 +44,7 @@
         {% for e in elections %}
             <div class="card" style="border-left: 5px solid {% if e.status == 'CFC' %}#f59e0b{% elif e.status == 'OPEN' %}#10b981{% else %}#ccc{% endif %};">
                 <div class="flex-between">
+                    
                     <div>
                         <span class="badge badge-{{ e.status|lower }}">{{ e.status }}</span>
                         <h3 style="display:inline; margin-left:10px;">{{ e.title }}</h3>
@@ -60,15 +73,19 @@
                     </div>
 
                     {% if is_admin %}
-                        {% if e.status == 'CFC' %}
-                            <form action="{{ url_for('admin.start_election', election_id=e.id) }}" method="post">
-                                <button class="btn btn-success btn-sm">Start Voting</button>
-                            </form>
-                        {% elif e.status == 'OPEN' %}
-                            <form action="{{ url_for('admin.close_election', election_id=e.id) }}" method="post" onsubmit="return confirm('End election?');">
-                                <button class="btn btn-danger btn-sm">Stop & Count</button>
-                            </form>
-                        {% endif %}
+                        <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-end;">
+                            {% if e.status == 'CFC' %}
+                                <form action="{{ url_for('admin.start_election', election_id=e.id) }}" method="post">
+                                    <button class="btn btn-success btn-sm">Start Voting</button>
+                                </form>
+                            {% elif e.status == 'OPEN' %}
+                                <form action="{{ url_for('admin.close_election', election_id=e.id) }}" method="post" onsubmit="return confirm('End election?');">
+                                    <button class="btn btn-danger btn-sm">Stop & Count</button>
+                                </form>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('admin.audit_election', election_id=e.id) }}" class="btn btn-sm btn-info" style="font-size:0.8em;">🕵️‍♂️ Master Audit</a>
+                        </div>
                     {% endif %}
                 </div>
             </div>

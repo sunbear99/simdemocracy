@@ -28,7 +28,7 @@
                             <p style="color:#555; font-style:italic; font-size:0.9em; margin-bottom:10px;">"{{ profile.statement }}"</p>
                         {% endif %}
                         <label>Score (0-5)</label>
-                        <input type="number" name="{{ name }}" min="0" max="5" 
+                        <input type="number" name="{{ name }}" min="0" max="5" placeholder="0"
                                value="{{ current_vote.get(name, 0) }}" 
                                style="width:80px">
                     </div>

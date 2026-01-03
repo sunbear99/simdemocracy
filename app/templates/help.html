@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h1>🗳️ How Voting Works</h1>
+    <p>SimDemocracy uses a <strong>secure, anonymous, cookie-based</strong> voting system. This ensures that while we know <em>that</em> you voted (preventing double-votes), we do not track <em>what</em> you voted for.</p>
+</div>
+
+<div class="card" style="border-left: 5px solid #2563eb;">
+    <h2>🟢 "Vote Cast" vs 🟡 "Edit Vote"</h2>
+    <div style="display:flex; gap:20px; margin-top:20px; flex-wrap:wrap;">
+        <div style="flex:1; background:#fffbeb; padding:15px; border-radius:8px; border:1px solid #fcd34d;">
+            <h3 style="margin-top:0;">🟡 Edit Vote</h3>
+            <p><strong>Meaning:</strong> You have full access.</p>
+            <p>We found the <strong>secure token</strong> on your device. You can simply click the button to change your vote.</p>
+        </div>
+
+        <div style="flex:1; background:#f0fdf4; padding:15px; border-radius:8px; border:1px solid #86efac;">
+            <h3 style="margin-top:0; color:#166534;">🟢 Vote Cast</h3>
+            <p><strong>Meaning:</strong> Your vote is counted, but locked.</p>
+            <p>We know you voted, but this device <strong>does not have the key</strong> to unlock your ballot (e.g., you are on a different device or cleared your cookies).</p>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="border-left: 5px solid #f59e0b;">
+    <h2>🔑 How to Recover a Locked Vote</h2>
+    <p>If you see the green <strong>Vote Cast</strong> button but want to change your vote, you have two options:</p>
+    
+    <ol>
+        <li><strong>Switch Devices:</strong> Return to the device (phone/laptop) where you originally voted. The "Edit Vote" button should appear there automatically.</li>
+        
+        <li style="margin-top:15px;"><strong>Manual Token Entry (New!):</strong>
+            <p>If you saved your <strong>12-character Verification Token</strong> when you first voted:</p>
+            <ul>
+                <li>Click the green <strong>✅ Vote Cast</strong> button on the dashboard.</li>
+                <li>You will be taken to a "Vote Locked" page.</li>
+                <li>Paste your token into the box and click <strong>Unlock</strong>.</li>
+                <li>This will restore your session and allow you to edit your ballot.</li>
+            </ul>
+        </li>
+    </ol>
+</div>
+
+<div style="text-align:center; margin-top:20px;">
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+</div>
+{% endblock %}

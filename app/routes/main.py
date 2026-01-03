@@ -5,8 +5,11 @@ from app.utils import get_registered_voters
 import uuid
 import json
 import secrets
+import requests
 
 bp = Blueprint('main', __name__)
+
+# --- DASHBOARD & HELP ---
 
 @bp.route('/')
 def dashboard():
@@ -39,6 +42,8 @@ def dashboard():
 def help_page():
     return render_template('help.html')
 
+# --- VOTING LOGIC ---
+
 @bp.route('/vote/<int:election_id>', methods=['GET', 'POST'])
 def vote(election_id):
     if 'user_id' not in session: return redirect(url_for('auth.login'))
@@ -51,22 +56,20 @@ def vote(election_id):
     if election.status != 'OPEN':
         return render_template('message.html', title="Closed", message="This election is not open.", type="warning")
 
-    # --- 1. HANDLE MANUAL TOKEN RECOVERY (New Logic) ---
+    # 1. MANUAL TOKEN RECOVERY (If user lost cookie)
     if request.method == 'POST' and 'manual_token' in request.form:
         token_input = request.form['manual_token'].strip()
-        # Verify token exists and belongs to this election
         ballot = Ballot.query.filter_by(verification_token=token_input).first()
         
         if ballot and ballot.election_id == election.id:
-            # Success! Restore access by setting the cookie
+            # Success: Restore access by setting the cookie
             resp = make_response(redirect(url_for('main.vote', election_id=election_id)))
             resp.set_cookie(f'v_token_{election_id}', token_input, max_age=60*60*24*30)
             return resp
         else:
-            # Failed
             return render_template('enter_token.html', election=election, error="That token is invalid for this election.")
 
-    # --- 2. DETERMINE MODE ---
+    # 2. DETERMINE MODE (New vs Edit)
     attendance = Attendance.query.filter_by(user_id=user_id, election_id=election.id).first()
     cookie_token = request.cookies.get(f'v_token_{election_id}')
     
@@ -87,15 +90,54 @@ def vote(election_id):
             # User voted but MISSING cookie -> SHOW TOKEN ENTRY PAGE
             return render_template('enter_token.html', election=election)
 
-    # --- 3. PROCESS VOTE SUBMISSION ---
+    # 3. PROCESS VOTE SUBMISSION
     if request.method == 'POST':
         vote_data = {}
+        
+        # A) Handle Referendums (Yes/No)
         if election.type == 'REFERENDUM':
             vote_data = {'choice': request.form.get('choice')}
+        
+        # B) Handle Candidates (0-5 Scoring)
         else:
             for cand in election.candidates:
                 val = request.form.get(cand)
-                vote_data[cand] = int(val) if val else 0
+                
+                # STRICT VALIDATION Logic
+                if val and val.strip():
+                    try:
+                        score = int(val)
+                        if score < 0: score = 0
+                        if score > 5: score = 5
+                        vote_data[cand] = score
+                    except ValueError:
+                        vote_data[cand] = 0 # Invalid text becomes 0
+                else:
+                    vote_data[cand] = 0 # Empty/Blank becomes 0
+
+        # --- RC ORACLE HOOK (FAIL-CLOSED SECURITY) ---
+        voter_hash = None
+        if mode == "NEW":
+            try:
+                # Default to localhost:5001 if not in config
+                oracle_url = current_app.config.get('RC_ORACLE_URL', 'http://localhost:5001/api/anonymize')
+                
+                rc_response = requests.post(
+                    oracle_url, 
+                    json={'user_id': user_id, 'election_id': election.id},
+                    timeout=3
+                )
+                
+                if rc_response.status_code == 200:
+                    voter_hash = rc_response.json().get('voter_hash')
+                else:
+                    # Oracle refused request
+                    return render_template('message.html', title="Security Error", message="The Anonymity Service rejected the request.", type="danger")
+
+            except Exception as e:
+                # Oracle is OFFLINE -> BLOCK THE VOTE
+                return render_template('message.html', title="System Offline", message="Critical: The Voting Authority (RC Oracle) is offline. Cannot generate secure hash.", type="danger")
+        # ---------------------------------------------
 
         token = cookie_token if mode == "EDIT" else secrets.token_hex(6)
 
@@ -103,7 +145,8 @@ def vote(election_id):
             new_ballot = Ballot(
                 election_id=election.id,
                 vote_choice=vote_data,
-                verification_token=token
+                verification_token=token,
+                voter_hash=voter_hash  # Save the hash from Oracle
             )
             new_attendance = Attendance(user_id=user_id, election_id=election.id)
             db.session.add(new_ballot)
@@ -123,7 +166,7 @@ def vote(election_id):
         resp.set_cookie(f'v_token_{election_id}', token, max_age=60*60*24*30)
         return resp
 
-    # --- 4. RENDER VOTING BOOTH ---
+    # 4. RENDER VOTING BOOTH
     profiles = CandidateProfile.query.filter_by(election_id=election.id).all()
     meta = {p.name: p for p in profiles}
 
@@ -132,6 +175,8 @@ def vote(election_id):
                          meta=meta, 
                          current_vote=current_vote, 
                          mode=mode)
+
+# --- CANDIDATE DECLARATION ---
 
 @bp.route('/declare/<int:election_id>', methods=['GET', 'POST'])
 def declare(election_id):

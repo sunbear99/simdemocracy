@@ -47,7 +47,8 @@
                 <span>{{ session.get('username') }}</span>
                 <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline">Logout</a>
             {% else %}
-                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-primary">Login with Discord</a>
+                <a href="{{ url_for('auth.login_reddit') }}" class="btn btn-sm" style="background:#ff4500; color:white;">Login Reddit</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-sm btn-primary">Login Discord</a>
             {% endif %}
         </div>
     </nav>

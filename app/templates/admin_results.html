@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="flex-between">
+        <h2>🕵️‍♂️ Master Audit: {{ election.title }}</h2>
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline" style="color:#555; border-color:#ccc;">Back</a>
+    </div>
+
+    <div style="background:#f3f4f6; padding:10px; margin-bottom:20px; border-radius:5px; border:1px solid #e5e7eb;">
+        <strong>Status:</strong> <span class="badge badge-{{ election.status|lower }}">{{ election.status }}</span> | 
+        <strong>Total Votes:</strong> {{ ballots|length }}
+    </div>
+
+    {% if not ballots %}
+        <p>No votes cast yet.</p>
+    {% else %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse: collapse; font-size:0.9em;">
+                <thead>
+                    <tr style="background:#e5e7eb;">
+                        <th style="padding:10px; border:1px solid #d1d5db;">ID</th>
+                        <th style="padding:10px; border:1px solid #d1d5db;">Voter Hash (RC Anonymized)</th>
+                        <th style="padding:10px; border:1px solid #d1d5db;">Vote Choice (JSON)</th>
+                        <th style="padding:10px; border:1px solid #d1d5db;">Token (User Key)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in ballots %}
+                    <tr>
+                        <td style="padding:8px; border:1px solid #e5e7eb;">{{ b.id }}</td>
+                        <td style="padding:8px; border:1px solid #e5e7eb; font-family:monospace; color:#d97706;">
+                            {{ b.voter_hash if b.voter_hash else "NULL (Legacy/Error)" }}
+                        </td>
+                        <td style="padding:8px; border:1px solid #e5e7eb;">
+                            <pre style="margin:0; font-size:0.85em;">{{ b.vote_choice }}</pre>
+                        </td>
+                        <td style="padding:8px; border:1px solid #e5e7eb; font-family:monospace; color:#2563eb;">
+                            {{ b.verification_token }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

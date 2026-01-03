@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="border-left: 5px solid #ef4444;">
+    <h2 style="color: #991b1b;">🚫 Strike Rigged Vote</h2>
+    
+    <div style="background: #fff5f5; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #fecaca;">
+        <strong>How this works:</strong>
+        <p style="margin-top:5px; margin-bottom:0;">
+            To preserve anonymity, you cannot see who voted for whom. 
+            However, if you know a specific user account is rigged or ineligible, you can enter their ID here.
+            <br><br>
+            The system will securely contact the <strong>Registration Commission (Oracle)</strong> to get that user's specific hash for this election and remove their ballot.
+        </p>
+    </div>
+    
+    {% if msg %}
+        <div style="padding: 15px; border-radius: 5px; margin-bottom: 20px; font-weight:bold;
+            {% if 'SUCCESS' in msg %}background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7;
+            {% elif 'NOT FOUND' in msg %}background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+            {% else %}background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca;{% endif %}">
+            {{ msg }}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        <label><strong>Target User ID:</strong></label>
+        <p style="font-size:0.85em; color:#666; margin-top:-5px;">
+            Discord ID (e.g., <code>1840938...</code>) or Reddit Username (e.g., <code>reddit_username</code>)
+        </p>
+        <input type="text" name="user_id" placeholder="Paste ID here..." required>
+        
+        <label><strong>Election ID:</strong></label>
+        <input type="number" name="election_id" placeholder="e.g. 156" required>
+        
+        <br>
+        <button class="btn btn-danger">⚠️ Permanently Delete Vote</button>
+    </form>
+    
+    <hr>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline" style="color:#555; border-color:#ccc;">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="border-left: 5px solid #f59e0b;">
+    <h2 style="color: #92400e;">🔒 Vote Locked</h2>
+    <p>You have already cast a ballot in <strong>{{ election.title }}</strong>.</p>
+    
+    <div style="background: #fffbeb; padding: 15px; border-radius: 6px; margin: 15px 0; border: 1px solid #fcd34d;">
+        <strong>Why am I seeing this?</strong><br>
+        To preserve anonymity, your identity is not stored with your ballot. 
+        Instead, we saved a secure cookie to your device. 
+        This device does not have that cookie (you may be on a different computer or cleared your cache).
+    </div>
+
+    <hr>
+
+    <h3>🔑 Manual Recovery</h3>
+    <p>If you saved your 12-character token, you can enter it here to unlock your ballot for editing.</p>
+    
+    {% if error %}
+    <div style="background:#fee2e2; color:#b91c1c; padding:10px; border-radius:5px; margin-bottom:10px; border:1px solid #fecaca;">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post">
+        <label><strong>Verification Token:</strong></label>
+        <div style="display:flex; gap:10px;">
+            <input type="text" name="manual_token" placeholder="Paste token here..." required style="margin-bottom:0;">
+            <button class="btn btn-warning">Unlock Vote</button>
+        </div>
+    </form>
+    
+    <br>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline" style="color:#555; border-color:#ccc;">Cancel</a>
+</div>
+{% endblock %}

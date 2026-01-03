@@ -20,5 +20,6 @@ def create_app(config_class=Config):
     app.register_blueprint(main.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
+    
 
     return app
